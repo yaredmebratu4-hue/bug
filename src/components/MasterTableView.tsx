@@ -12,7 +12,8 @@ import {
   Trash2, 
   AlertCircle,
   ExternalLink,
-  ChevronRight
+  ChevronRight,
+  SlidersHorizontal
 } from 'lucide-react';
 import { MASTER_AUDIT_ITEMS } from '../data/auditData';
 import { AuditItem, Status, Confidence, Category } from '../types';
@@ -35,6 +36,7 @@ export const MasterTableView: React.FC<MasterTableViewProps> = ({
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [sortField, setSortField] = useState<keyof AuditItem>('confidence');
   const [sortAsc, setSortAsc] = useState<boolean>(false);
+  const [showMobileFilters, setShowMobileFilters] = useState<boolean>(false);
 
   // Filter items
   const filteredItems = useMemo(() => {
@@ -143,95 +145,128 @@ export const MasterTableView: React.FC<MasterTableViewProps> = ({
     document.body.removeChild(link);
   };
 
-  // Generate Bash commands for selected items
+  // Copy selected cleanup commands
   const handleCopySelectedCommands = () => {
-    const selected = MASTER_AUDIT_ITEMS.filter(i => selectedItemIds.has(i.id) && i.commandBash);
-    if (selected.length === 0) return;
-    const commands = selected.map(i => `# ${i.path}\n${i.commandBash}`).join('\n\n');
-    navigator.clipboard.writeText(commands);
-    setCopiedId('selected-commands');
-    setTimeout(() => setCopiedId(null), 2000);
+    const selected = MASTER_AUDIT_ITEMS.filter(i => selectedItemIds.has(i.id));
+    const commands = selected
+      .map(i => i.commandBash)
+      .filter(Boolean)
+      .join('\n');
+
+    if (commands) {
+      navigator.clipboard.writeText(commands);
+      setCopiedId('selected-commands');
+      setTimeout(() => setCopiedId(null), 2000);
+    }
   };
 
-  // Apple Status Badge styling helper
   const getStatusBadge = (status: Status) => {
     switch (status) {
       case 'Definitely unused':
         return 'bg-red-50 text-red-700 border-red-200/80';
       case 'Probably unused':
         return 'bg-amber-50 text-amber-800 border-amber-200/80';
-      case 'Needs verification':
-        return 'bg-purple-50 text-purple-700 border-purple-200/80';
       case 'Broken':
         return 'bg-red-100 text-red-800 border-red-300 font-semibold';
+      case 'Needs verification':
+        return 'bg-purple-50 text-purple-700 border-purple-200/80';
       case 'Keep':
         return 'bg-emerald-50 text-emerald-800 border-emerald-200/80';
-      case 'Review':
-        return 'bg-blue-50 text-blue-700 border-blue-200/80';
       default:
         return 'bg-zinc-100 text-zinc-700 border-zinc-200';
     }
   };
 
+  const getConfidenceBadge = (confidence: Confidence) => {
+    switch (confidence) {
+      case 'High':
+        return 'text-red-700 font-medium';
+      case 'Medium':
+        return 'text-amber-700 font-medium';
+      case 'Low':
+        return 'text-zinc-600';
+      default:
+        return 'text-zinc-500';
+    }
+  };
+
   return (
-    <div className="space-y-4 animate-in fade-in duration-300" id="master-catalog-section">
+    <div className="space-y-4 animate-in fade-in duration-300" id="master-table-section">
       
-      {/* Top Filter Controls Bar (Apple Minimalist Style) */}
-      <div className="bg-white p-4 rounded-2xl border border-black/[0.06] shadow-[0_1px_3px_rgba(0,0,0,0.03)] space-y-3">
+      {/* Controls & Filter Bar (Apple-style segmented filter surface) */}
+      <div className="bg-white rounded-2xl border border-black/[0.06] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.03)] space-y-3">
+        
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           
-          {/* Filter Dropdowns */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs font-medium text-zinc-500 flex items-center gap-1">
-              <Filter className="w-3.5 h-3.5 text-zinc-400" />
-              <span>Filter:</span>
+          {/* Mobile Filter Toggle & Quick Info */}
+          <div className="flex md:hidden items-center justify-between">
+            <button
+              onClick={() => setShowMobileFilters(!showMobileFilters)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 text-zinc-800 text-xs font-medium cursor-pointer"
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5 text-zinc-500" />
+              <span>Filter Options ({statusFilter !== 'All' || confidenceFilter !== 'All' || categoryFilter !== 'All' ? 'Active' : 'All'})</span>
+            </button>
+            <span className="text-xs text-zinc-500">
+              <strong className="text-zinc-900">{filteredItems.length}</strong> items
             </span>
+          </div>
 
-            {/* Status Dropdown */}
-            <select
-              id="filter-status-select"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-zinc-100/80 hover:bg-zinc-100 border border-black/[0.04] rounded-full px-3 py-1.5 text-xs text-zinc-800 focus:outline-none focus:ring-2 focus:ring-[#0071E3]/20 cursor-pointer"
-            >
-              <option value="All">All Statuses ({MASTER_AUDIT_ITEMS.length})</option>
-              <option value="Definitely unused">Definitely unused</option>
-              <option value="Probably unused">Probably unused</option>
-              <option value="Needs verification">Needs verification</option>
-              <option value="Broken">Broken (Bug)</option>
-              <option value="Review">Review</option>
-              <option value="Keep">Keep</option>
-            </select>
+          {/* Desktop Filter Pills / Mobile Collapsible Panel */}
+          <div className={`flex flex-col sm:flex-row sm:items-center gap-2.5 flex-wrap ${showMobileFilters ? 'flex' : 'hidden md:flex'}`}>
+            
+            {/* Status Select */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">Status:</span>
+              <select
+                id="filter-status-select"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="bg-zinc-100 hover:bg-zinc-200/70 border border-transparent rounded-full px-2.5 py-1 text-xs text-zinc-800 focus:outline-none focus:ring-2 focus:ring-[#0071E3]/20 cursor-pointer transition-colors"
+              >
+                <option value="All">All Statuses</option>
+                <option value="Definitely unused">Definitely unused (25)</option>
+                <option value="Probably unused">Probably unused (11)</option>
+                <option value="Needs verification">Needs verification (7)</option>
+                <option value="Broken">Broken (1)</option>
+                <option value="Keep">Keep / Verified (3)</option>
+              </select>
+            </div>
 
-            {/* Confidence Dropdown */}
-            <select
-              id="filter-confidence-select"
-              value={confidenceFilter}
-              onChange={(e) => setConfidenceFilter(e.target.value)}
-              className="bg-zinc-100/80 hover:bg-zinc-100 border border-black/[0.04] rounded-full px-3 py-1.5 text-xs text-zinc-800 focus:outline-none focus:ring-2 focus:ring-[#0071E3]/20 cursor-pointer"
-            >
-              <option value="All">All Confidences</option>
-              <option value="High">High Confidence</option>
-              <option value="Medium">Medium Confidence</option>
-            </select>
+            {/* Confidence Select */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">Confidence:</span>
+              <select
+                id="filter-confidence-select"
+                value={confidenceFilter}
+                onChange={(e) => setConfidenceFilter(e.target.value)}
+                className="bg-zinc-100 hover:bg-zinc-200/70 border border-transparent rounded-full px-2.5 py-1 text-xs text-zinc-800 focus:outline-none focus:ring-2 focus:ring-[#0071E3]/20 cursor-pointer transition-colors"
+              >
+                <option value="All">All Confidences</option>
+                <option value="High">High (25)</option>
+                <option value="Medium">Medium (11)</option>
+                <option value="Low">Low (5)</option>
+              </select>
+            </div>
 
-            {/* Category Dropdown */}
-            <select
-              id="filter-category-select"
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="bg-zinc-100/80 hover:bg-zinc-100 border border-black/[0.04] rounded-full px-3 py-1.5 text-xs text-zinc-800 focus:outline-none focus:ring-2 focus:ring-[#0071E3]/20 cursor-pointer"
-            >
-              <option value="All">All Categories</option>
-              <option value="Folder">Folder</option>
-              <option value="File">File</option>
-              <option value="Code">Code</option>
-              <option value="Dependency">Dependency</option>
-              <option value="DevDependency">DevDependency</option>
-              <option value="Config">Config</option>
-              <option value="Tooling">Tooling</option>
-              <option value="Docs">Docs</option>
-            </select>
+            {/* Category Select */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">Category:</span>
+              <select
+                id="filter-category-select"
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="bg-zinc-100 hover:bg-zinc-200/70 border border-transparent rounded-full px-2.5 py-1 text-xs text-zinc-800 focus:outline-none focus:ring-2 focus:ring-[#0071E3]/20 cursor-pointer transition-colors"
+              >
+                <option value="All">All Categories</option>
+                <option value="Build Artifacts">Build Artifacts</option>
+                <option value="Temporary Scripts">Temporary Scripts</option>
+                <option value="Dead Code">Dead Code</option>
+                <option value="Documentation">Documentation</option>
+                <option value="Dependencies">Dependencies</option>
+                <option value="Configuration">Configuration</option>
+              </select>
+            </div>
 
             {(statusFilter !== 'All' || confidenceFilter !== 'All' || categoryFilter !== 'All' || searchQuery) && (
               <button
@@ -241,21 +276,21 @@ export const MasterTableView: React.FC<MasterTableViewProps> = ({
                   setCategoryFilter('All');
                   setSearchQuery('');
                 }}
-                className="text-xs text-[#0071E3] hover:underline font-medium px-1 cursor-pointer"
+                className="text-xs text-[#0071E3] hover:underline font-medium px-1 cursor-pointer self-start sm:self-auto"
               >
-                Reset
+                Reset filters
               </button>
             )}
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-2 self-end md:self-auto flex-wrap">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
             <button
               onClick={selectAllSafe}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 hover:bg-zinc-200/80 active:bg-zinc-200 text-zinc-700 text-xs font-medium border border-black/[0.04] transition-colors cursor-pointer"
             >
               <CheckSquare className="w-3.5 h-3.5 text-zinc-600" />
-              <span>Select Safe Items</span>
+              <span>Select Safe</span>
             </button>
 
             {selectedItemIds.size > 0 && (
@@ -265,7 +300,7 @@ export const MasterTableView: React.FC<MasterTableViewProps> = ({
                   className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#0071E3] hover:bg-[#0077ED] text-white text-xs font-medium transition-all shadow-xs cursor-pointer"
                 >
                   {copiedId === 'selected-commands' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>Copy Commands ({selectedItemIds.size})</span>
+                  <span>Copy ({selectedItemIds.size})</span>
                 </button>
                 <button
                   onClick={clearSelection}
@@ -298,14 +333,83 @@ export const MasterTableView: React.FC<MasterTableViewProps> = ({
               </span>
             )}
           </div>
-          <div className="text-[11px] text-zinc-400">
-            Click any row to inspect audit evidence and tailored commands
+          <div className="hidden sm:block text-[11px] text-zinc-400">
+            Click any item to inspect audit evidence and cleanup commands
           </div>
         </div>
       </div>
 
-      {/* Main Table Card (macOS Finder / Table Look) */}
-      <div className="bg-white rounded-2xl border border-black/[0.06] shadow-[0_1px_3px_rgba(0,0,0,0.03)] overflow-hidden">
+      {/* MOBILE LIST CARD VIEW (<md screens) */}
+      <div className="block md:hidden space-y-2.5">
+        {filteredItems.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-black/[0.06] p-8 text-center text-zinc-400">
+            <AlertCircle className="w-8 h-8 mx-auto mb-2 text-zinc-300" />
+            <p className="text-sm font-medium text-zinc-600">No matching audit findings</p>
+            <p className="text-xs text-zinc-400 mt-1">Try clearing filters or search query</p>
+          </div>
+        ) : (
+          filteredItems.map((item) => {
+            const isSelected = selectedItemIds.has(item.id);
+            return (
+              <div 
+                key={item.id}
+                onClick={() => onSelectItem(item)}
+                className={`bg-white rounded-2xl border p-3.5 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.03)] active:bg-zinc-50 cursor-pointer ${
+                  isSelected ? 'border-[#0071E3] bg-blue-50/20' : 'border-black/[0.06]'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-start gap-2.5 min-w-0">
+                    <div 
+                      onClick={(e) => toggleSelect(item.id, e)}
+                      className="pt-0.5 cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => {}}
+                        className="rounded border-zinc-300 text-[#0071E3] focus:ring-[#0071E3] w-4 h-4 cursor-pointer"
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="font-mono text-xs font-semibold text-zinc-900 break-all">
+                        {item.path}
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-wrap mt-1.5">
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium border ${getStatusBadge(item.status)}`}>
+                          {item.status}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-zinc-100 text-zinc-600">
+                          {item.category}
+                        </span>
+                        {item.size && (
+                          <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono font-medium bg-red-50 text-red-700">
+                            {item.size}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <ChevronRight className="w-4 h-4 text-zinc-400 shrink-0 mt-1" />
+                </div>
+
+                <p className="text-xs text-zinc-600 mt-2 line-clamp-2 leading-relaxed">
+                  {item.reason}
+                </p>
+
+                <div className="mt-2.5 pt-2 border-t border-zinc-100 flex items-center justify-between text-[11px] text-zinc-400">
+                  <span>Confidence: <strong className={getConfidenceBadge(item.confidence)}>{item.confidence}</strong></span>
+                  <span className="text-[#0071E3] font-medium">Inspect Details →</span>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* DESKTOP TABLE VIEW (>=md screens) */}
+      <div className="hidden md:block bg-white rounded-2xl border border-black/[0.06] shadow-[0_1px_3px_rgba(0,0,0,0.03)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
@@ -380,57 +484,47 @@ export const MasterTableView: React.FC<MasterTableViewProps> = ({
                           type="checkbox"
                           checked={isSelected}
                           onChange={() => {}}
-                          className="rounded border-zinc-300 text-[#0071E3] focus:ring-0 cursor-pointer"
+                          className="rounded border-zinc-300 text-[#0071E3] focus:ring-[#0071E3] w-3.5 h-3.5 cursor-pointer"
                         />
                       </td>
 
                       {/* Path */}
-                      <td className="p-3">
+                      <td className="p-3 font-mono font-medium text-zinc-900 break-all max-w-[240px]">
                         <div className="flex items-center gap-1.5">
-                          <span className="font-mono text-zinc-800 font-medium break-all">
-                            {item.path}
-                          </span>
+                          <span className="truncate">{item.path}</span>
                           <button
                             onClick={(e) => handleCopyPath(e, item.path, item.id)}
-                            className="opacity-0 group-hover:opacity-100 p-1 rounded-full hover:bg-zinc-200 text-zinc-400 hover:text-zinc-700 transition-all shrink-0 cursor-pointer"
+                            className="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-zinc-600 p-0.5 rounded transition-all shrink-0 cursor-pointer"
                             title="Copy path"
                           >
-                            {copiedId === item.id ? (
-                              <Check className="w-3 h-3 text-emerald-600" />
-                            ) : (
-                              <Copy className="w-3 h-3" />
-                            )}
+                            {copiedId === item.id ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
                           </button>
                         </div>
                       </td>
 
                       {/* Category */}
-                      <td className="p-3">
-                        <span className="inline-block px-2 py-0.5 rounded-full text-[11px] font-medium bg-zinc-100 text-zinc-600">
+                      <td className="p-3 whitespace-nowrap">
+                        <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-zinc-100 text-zinc-600">
                           {item.category}
                         </span>
                       </td>
 
                       {/* Status */}
-                      <td className="p-3">
-                        <span className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${getStatusBadge(item.status)}`}>
+                      <td className="p-3 whitespace-nowrap">
+                        <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${getStatusBadge(item.status)}`}>
                           {item.status}
                         </span>
                       </td>
 
                       {/* Confidence */}
-                      <td className="p-3">
-                        <span className={`text-[11px] font-medium ${
-                          item.confidence === 'High' ? 'text-zinc-800' : 'text-zinc-500'
-                        }`}>
-                          {item.confidence}
-                        </span>
+                      <td className={`p-3 whitespace-nowrap text-xs ${getConfidenceBadge(item.confidence)}`}>
+                        {item.confidence}
                       </td>
 
                       {/* Size */}
-                      <td className="p-3">
+                      <td className="p-3 font-mono text-zinc-600 whitespace-nowrap">
                         {item.size ? (
-                          <span className="font-mono text-zinc-700 text-[11px]">
+                          <span className="font-medium text-red-600 bg-red-50 px-1.5 py-0.5 rounded text-[11px]">
                             {item.size}
                           </span>
                         ) : (
@@ -440,14 +534,12 @@ export const MasterTableView: React.FC<MasterTableViewProps> = ({
 
                       {/* Reason */}
                       <td className="p-3 text-zinc-600 leading-relaxed max-w-md">
-                        <p className="line-clamp-2">
-                          {item.reason}
-                        </p>
+                        <p className="line-clamp-2">{item.reason}</p>
                       </td>
 
-                      {/* Action Chevron */}
+                      {/* Actions */}
                       <td className="p-3 text-center">
-                        <span className="p-1 rounded-full text-zinc-400 group-hover:text-zinc-800 transition-colors inline-block">
+                        <span className="p-1 rounded-full text-zinc-400 group-hover:text-[#0071E3] transition-colors inline-block">
                           <ChevronRight className="w-4 h-4" />
                         </span>
                       </td>

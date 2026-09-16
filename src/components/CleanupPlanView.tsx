@@ -152,12 +152,12 @@ npm run build`;
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300" id="cleanup-plan-section">
+    <div className="space-y-5 sm:space-y-6 animate-in fade-in duration-300" id="cleanup-plan-section">
       
       {/* Intro Card with Shell Selector (Apple Style) */}
-      <div className="bg-white p-5 rounded-2xl border border-black/[0.06] shadow-[0_1px_3px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-white p-4 sm:p-5 rounded-2xl border border-black/[0.06] shadow-[0_1px_3px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h2 className="text-base font-semibold text-zinc-900">
+          <h2 className="text-sm sm:text-base font-semibold text-zinc-900">
             Four-Phase Remediation Roadmap
           </h2>
           <p className="text-xs text-zinc-500 mt-1 max-w-2xl leading-relaxed">
@@ -165,7 +165,7 @@ npm run build`;
           </p>
         </div>
 
-        <div className="flex items-center gap-3 self-end sm:self-auto shrink-0">
+        <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0 flex-wrap">
           <div className="bg-zinc-100 p-0.5 rounded-full inline-flex border border-black/[0.04]">
             <button
               onClick={() => setShellType('bash')}
@@ -200,19 +200,19 @@ npm run build`;
       </div>
 
       {/* Phase 1: Fix TS18002 */}
-      <div className="bg-white rounded-2xl border border-black/[0.06] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] space-y-3">
-        <div className="flex items-center justify-between">
+      <div className="bg-white rounded-2xl border border-black/[0.06] p-4 sm:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-2.5">
-            <span className="w-6 h-6 rounded-full bg-red-50 text-red-700 font-semibold text-xs flex items-center justify-center border border-red-200/60">
+            <span className="w-6 h-6 rounded-full bg-red-50 text-red-700 font-semibold text-xs flex items-center justify-center border border-red-200/60 shrink-0">
               1
             </span>
-            <h3 className="text-sm font-semibold text-zinc-900">
+            <h3 className="text-xs sm:text-sm font-semibold text-zinc-900">
               Phase 1: Fix Broken Typecheck (TS18002) in <code className="text-xs bg-zinc-100 px-1 py-0.5 rounded font-mono text-zinc-800">tsconfig.json</code>
             </h3>
           </div>
           <button
             onClick={() => copyToClipboard(phase1Script, setCopiedPhase1)}
-            className="inline-flex items-center gap-1 text-xs text-[#0071E3] hover:underline font-medium cursor-pointer"
+            className="inline-flex items-center gap-1 text-xs text-[#0071E3] hover:underline font-medium cursor-pointer self-start sm:self-auto"
           >
             {copiedPhase1 ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5 text-zinc-400" />}
             <span>{copiedPhase1 ? "Copied" : "Copy Phase 1"}</span>
@@ -223,20 +223,20 @@ npm run build`;
           Someone made an uncommitted change to <code className="text-xs bg-zinc-100 px-1 py-0.5 rounded font-mono text-zinc-800">tsconfig.json</code> adding <code className="text-xs bg-zinc-100 px-1 py-0.5 rounded font-mono text-zinc-800">"files": []</code> without project references. Reverting this immediately restores the TypeScript build so you can safely verify subsequent cleanups.
         </p>
 
-        <div className="bg-[#1E1E20] rounded-xl p-3.5 font-mono text-xs text-zinc-200 border border-zinc-800 overflow-x-auto">
-          <pre className="text-zinc-200 whitespace-pre-wrap leading-relaxed">{phase1Script}</pre>
+        <div className="bg-[#1E1E20] rounded-xl p-3 sm:p-3.5 font-mono text-xs text-zinc-200 border border-zinc-800 overflow-x-auto">
+          <pre className="text-zinc-200 whitespace-pre-wrap leading-relaxed text-[11px] sm:text-xs">{phase1Script}</pre>
         </div>
       </div>
 
       {/* Phase 2: Batch Remove Debris (~195 MB) */}
-      <div className="bg-white rounded-2xl border border-black/[0.06] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] space-y-4">
+      <div className="bg-white rounded-2xl border border-black/[0.06] p-4 sm:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-2.5">
-            <span className="w-6 h-6 rounded-full bg-zinc-100 text-zinc-800 font-semibold text-xs flex items-center justify-center border border-zinc-200">
+            <span className="w-6 h-6 rounded-full bg-zinc-100 text-zinc-800 font-semibold text-xs flex items-center justify-center border border-zinc-200 shrink-0">
               2
             </span>
             <div>
-              <h3 className="text-sm font-semibold text-zinc-900">
+              <h3 className="text-xs sm:text-sm font-semibold text-zinc-900">
                 Phase 2: Customize & Remove Debris Artifacts (~194.8 MB)
               </h3>
               <p className="text-xs text-zinc-500 mt-0.5">
@@ -245,7 +245,7 @@ npm run build`;
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 shrink-0 flex-wrap">
             <button
               onClick={selectAll}
               className="text-xs text-[#0071E3] hover:underline font-medium cursor-pointer"
@@ -271,7 +271,7 @@ npm run build`;
         </div>
 
         {/* Checkbox item grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 pt-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5 pt-1">
           {[
             { key: 'asar-release', label: 'asar-extract-release/', size: '129.4 MB', desc: 'Old unpacked production ASAR' },
             { key: 'asar-temp', label: 'asar-extract-temp/', size: '51.3 MB', desc: 'Older preload/index.js build extraction' },
@@ -310,7 +310,7 @@ npm run build`;
                   <span className="font-mono text-zinc-900 text-xs font-medium truncate">
                     {item.label}
                   </span>
-                  <span className="text-[11px] font-mono text-zinc-500 bg-zinc-100 px-1.5 py-0.2 rounded shrink-0">
+                  <span className="text-[10px] sm:text-[11px] font-mono text-zinc-500 bg-zinc-100 px-1.5 py-0.2 rounded shrink-0">
                     {item.size}
                   </span>
                 </div>
@@ -321,30 +321,30 @@ npm run build`;
         </div>
 
         {/* Dynamic code preview */}
-        <div className="bg-[#1E1E20] rounded-xl p-3.5 font-mono text-xs text-zinc-200 border border-zinc-800 overflow-x-auto">
+        <div className="bg-[#1E1E20] rounded-xl p-3 sm:p-3.5 font-mono text-xs text-zinc-200 border border-zinc-800 overflow-x-auto">
           <div className="text-[11px] text-zinc-500 mb-2">
             Generated command ({shellType}):
           </div>
-          <pre className="text-zinc-200 whitespace-pre-wrap leading-relaxed">
+          <pre className="text-zinc-200 whitespace-pre-wrap leading-relaxed text-[11px] sm:text-xs">
             {shellType === 'bash' ? generateDebrisBash() : generateDebrisPowerShell()}
           </pre>
         </div>
       </div>
 
       {/* Phase 3: Prune Dependencies */}
-      <div className="bg-white rounded-2xl border border-black/[0.06] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] space-y-3">
-        <div className="flex items-center justify-between">
+      <div className="bg-white rounded-2xl border border-black/[0.06] p-4 sm:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-2.5">
-            <span className="w-6 h-6 rounded-full bg-zinc-100 text-zinc-800 font-semibold text-xs flex items-center justify-center border border-zinc-200">
+            <span className="w-6 h-6 rounded-full bg-zinc-100 text-zinc-800 font-semibold text-xs flex items-center justify-center border border-zinc-200 shrink-0">
               3
             </span>
-            <h3 className="text-sm font-semibold text-zinc-900">
+            <h3 className="text-xs sm:text-sm font-semibold text-zinc-900">
               Phase 3: Uninstall Unused & Redundant Dependencies (5 Packages)
             </h3>
           </div>
           <button
             onClick={() => copyToClipboard(phase3Script, setCopiedPhase3)}
-            className="inline-flex items-center gap-1 text-xs text-[#0071E3] hover:underline font-medium cursor-pointer"
+            className="inline-flex items-center gap-1 text-xs text-[#0071E3] hover:underline font-medium cursor-pointer self-start sm:self-auto"
           >
             {copiedPhase3 ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5 text-zinc-400" />}
             <span>{copiedPhase3 ? "Copied" : "Copy Phase 3"}</span>
@@ -368,25 +368,25 @@ npm run build`;
           </div>
         </div>
 
-        <div className="bg-[#1E1E20] rounded-xl p-3.5 font-mono text-xs text-zinc-200 border border-zinc-800 overflow-x-auto">
-          <pre className="text-zinc-200 whitespace-pre-wrap leading-relaxed">{phase3Script}</pre>
+        <div className="bg-[#1E1E20] rounded-xl p-3 sm:p-3.5 font-mono text-xs text-zinc-200 border border-zinc-800 overflow-x-auto">
+          <pre className="text-zinc-200 whitespace-pre-wrap leading-relaxed text-[11px] sm:text-xs">{phase3Script}</pre>
         </div>
       </div>
 
       {/* Phase 4: Code Cleanups & Secret Rotation */}
-      <div className="bg-white rounded-2xl border border-black/[0.06] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] space-y-3">
-        <div className="flex items-center justify-between">
+      <div className="bg-white rounded-2xl border border-black/[0.06] p-4 sm:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-2.5">
-            <span className="w-6 h-6 rounded-full bg-zinc-100 text-zinc-800 font-semibold text-xs flex items-center justify-center border border-zinc-200">
+            <span className="w-6 h-6 rounded-full bg-zinc-100 text-zinc-800 font-semibold text-xs flex items-center justify-center border border-zinc-200 shrink-0">
               4
             </span>
-            <h3 className="text-sm font-semibold text-zinc-900">
+            <h3 className="text-xs sm:text-sm font-semibold text-zinc-900">
               Phase 4: Dead Source Code Cleanups & Secret Rotation
             </h3>
           </div>
           <button
             onClick={() => copyToClipboard(phase4Script, setCopiedPhase4)}
-            className="inline-flex items-center gap-1 text-xs text-[#0071E3] hover:underline font-medium cursor-pointer"
+            className="inline-flex items-center gap-1 text-xs text-[#0071E3] hover:underline font-medium cursor-pointer self-start sm:self-auto"
           >
             {copiedPhase4 ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5 text-zinc-400" />}
             <span>{copiedPhase4 ? "Copied" : "Copy Phase 4"}</span>
@@ -397,8 +397,8 @@ npm run build`;
           Remove the dead <code className="text-xs bg-zinc-100 px-1 py-0.5 rounded font-mono text-zinc-800">PlaceholderPage.tsx</code> import, remove unused <code className="text-xs bg-zinc-100 px-1 py-0.5 rounded font-mono text-zinc-800">useConfirmPassword.ts</code>, remove runtime write debug file log in <code className="text-xs bg-zinc-100 px-1 py-0.5 rounded font-mono text-zinc-800">electron/main/index.ts</code>, and rotate the plaintext Google Drive secret.
         </p>
 
-        <div className="bg-[#1E1E20] rounded-xl p-3.5 font-mono text-xs text-zinc-200 border border-zinc-800 overflow-x-auto">
-          <pre className="text-zinc-200 whitespace-pre-wrap leading-relaxed">{phase4Script}</pre>
+        <div className="bg-[#1E1E20] rounded-xl p-3 sm:p-3.5 font-mono text-xs text-zinc-200 border border-zinc-800 overflow-x-auto">
+          <pre className="text-zinc-200 whitespace-pre-wrap leading-relaxed text-[11px] sm:text-xs">{phase4Script}</pre>
         </div>
       </div>
 
