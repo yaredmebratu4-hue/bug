@@ -1,0 +1,6 @@
+{
+  "name": "Dagim Pharmacy Codebase Cleanup Audit",
+  "description": "Interactive Codebase Cleanup Audit Report for Dagim Pharmacy Management System featuring file analysis, dead dependency pruning, and terminal cleanup scripts.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
